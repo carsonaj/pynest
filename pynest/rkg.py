@@ -5,6 +5,7 @@ import numpy as np
 # M = (R^{n x d}, <.,.>) G = O_d (i.e. rdpg) 
 
 # sample n points uniformly from first orthant of the unit d-ball
+# variable names inspired by rejection sampling
 def sample_unif_ball_orthant(n=1, d=1):
     count = 0
     sample_list = []
