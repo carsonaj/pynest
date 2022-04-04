@@ -1,21 +1,25 @@
 import numpy as np
 
+# random kernel graph
 
+
+#========================================================================================
+#========================================================================================
 
 # M = (R^{n x d}, <.,.>) G = O_d (i.e. rdpg) 
 
 # sample n points uniformly from first orthant of the unit d-ball
 # variable names inspired by rejection sampling
-def sample_unif_ball_orthant(n=1, d=1):
+def samp_unif_ball_orthant(n=1, d=1):
     count = 0
-    sample_list = []
+    samp_list = []
     while(count < n):
         y = np.random.uniform(size=d)
         if np.linalg.norm(y, ord=2) <= 1:
-            sample_list.append(y)
+            samp_list.append(y)
             count = count + 1
         
-    x = np.array(sample_list)
+    x = np.array(samp_list)
     
     return x
 
@@ -26,7 +30,7 @@ def get_prob_mat(x):
     return p
 
 # sample adjacency matrix
-def sample_adj_mat(p):
+def samp_adj_mat(p):
     n = p.shape[0]
     ind = np.triu_indices(n, k=1)
     a_vals = np.random.binomial(1, p[ind])
@@ -120,5 +124,36 @@ def get_test_stat(a, b, d):
     
     return t
 #========================================================================================
+#========================================================================================
 
-# 
+# stochastic block model
+
+# sample vertex label matrix
+def samp_lab_mat(num_vert, lab_prob):
+    lab_mat = np.random.multinomial(1, pvals=lab_prob, size=num_vert)
+
+    return lab_mat
+
+class SBM:
+    def __init__(self, num_vert, lab_prob, dim_lat_pos):
+
+        # label probabilities of length num_bloc
+        self.lab_prob = lab_prob
+
+        # number of blocks
+        self.num_bloc = len(lab_prob)
+
+        # label matrix of size num_vert x num_bloc
+        self.lab_mat = samp_lab_mat(num_vert, lab_prob)
+
+        # latent positions of size num_bloc x dim_lat_pos
+        self.lat_pos = samp_unif_ball_orthant(self.num_bloc, dim_lat_pos)
+
+        # block probability matrix of size num_bloc x num_bloc
+        self.bloc_prob_mat = get_prob_mat(self.lat_pos)
+        
+        # probability matrix of size num_vert x num_vert
+        self.prob_mat = self.lab_mat @ self.bloc_prob_mat @ self.lab_mat.transpose()
+    
+        
+
