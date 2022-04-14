@@ -154,6 +154,44 @@ class SBM:
         
         # probability matrix of size num_vert x num_vert
         self.prob_mat = self.lab_mat @ self.bloc_prob_mat @ self.lab_mat.transpose()
-    
-        
+#========================================================================================
+#========================================================================================
 
+# distorted partition model
+
+class DPM:
+    def __init__(self, p, lab_mat, orth_pert, alpha):
+
+        self.p = p
+
+        self.lab_mat = lab_mat
+
+        self.orth_pert = orth_pert
+
+        self.alpha = alpha
+
+        # number of vertices
+        self.num_vert = lab_mat.shape[0]
+
+        num_bloc = lab_mat.shape[1]        
+
+        # q
+        q = 1 - p
+
+        # probability matrix of size num_bloc x num_bloc
+        bloc_prob_mat = q * np.ones((num_bloc, num_bloc)) + (p - q) * np.diag(np.ones(num_bloc))
+        
+        # spectral decomposition of block probability matrix
+        bloc_prob_spec = get_sd(bloc_prob_mat)
+        self.bloc_prob_spec = bloc_prob_spec
+
+        # square root of block probability matrix
+        lam = bloc_prob_spec[0]
+        U = bloc_prob_spec[1]
+        Lam_sqrt = np.diag(lam)**.5
+
+        # perturbed probability matrix of size num_vert x num_vert
+        B = U @ Lam_sqrt
+        Z = alpha * lab_mat @ B + (1 - alpha) * orth_pert
+
+        self.prob_mat = Z @ Z.transpose()
